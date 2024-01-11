@@ -8,7 +8,6 @@ edition = "2021"
 [dependencies]
 http = "0.2"
 infer = "0.15.0"
-mime_guess = "2.0.4"
+json = "0.12.4"
 tao = { version = "0.24", default-features = false, features = [ "rwh_05" ] }
-winit = "0.29.7"
 wry = "0.35.1"

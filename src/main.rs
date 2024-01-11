@@ -47,37 +47,54 @@ fn main() -> wry::Result<()> {
         window.set_title(&title.as_str());
     })
     .with_ipc_handler(|message| {
-        let seperator = message.find(' ').unwrap();
-        let ident = &message[..seperator];
-        let body = &message[seperator+1..];
-        match ident {
-            "ECHO" => println!("{}", body),
-            "WINDOW" => {
-                if body == "fullscreen" { 
-                    if window.fullscreen() == None {
-                        window.set_fullscreen(Some(Fullscreen::Borderless(None)));
+        let parsed = json::parse(&message).unwrap();
+
+        // let seperator = message.find(' ').unwrap();
+        // let ident = &message[..seperator];
+        // let body = &message[seperator+1..];
+
+        match parsed["type"].as_str() {
+            Some("echo") => println!("{}", parsed["message"]),
+            Some("window") => {
+                if parsed.has_key("fullscreen") { 
+                    if (parsed["fullscreen"] == "toggle") {
+                        if window.fullscreen() == None {
+                            window.set_fullscreen(Some(Fullscreen::Borderless(None)));
+                        } else {
+                            window.set_fullscreen(None);
+                        }
                     } else {
-                        window.set_fullscreen(None);
+                        if (parsed["fullscreen"] == true) {
+                            window.set_fullscreen(Some(Fullscreen::Borderless(None)));
+                        }
+
+                        if (parsed["fullscreen"] == false) {
+                            window.set_fullscreen(None);
+                        }
                     }
-                } else if body.starts_with("title") {
-                    window.set_title(&body[6..]);
-                } else if body.starts_with("size") {
-                    let res: Vec<&str> = body[5..].split(' ').collect();
-                    let width = res[0].parse::<i32>().unwrap();
-                    let height = res[1].parse::<i32>().unwrap();
+                    
+                } 
+                if parsed.has_key("title") {
+                    window.set_title(parsed["title"].as_str().unwrap());
+                } 
+                if parsed.has_key("size") {
+                    let width = parsed["size"]["x"].as_i32().unwrap();
+                    let height = parsed["size"]["y"].as_i32().unwrap();
                     let new_size = LogicalSize::new(width, height);
                     window.set_inner_size(new_size);
-                } else if body.starts_with("resizable") {
-                    window.set_resizable(body.ends_with("true"));
+                } 
+                if parsed.has_key("resizable") {
+                    window.set_resizable(parsed["resizable"] == true);
                 }
             },
-            &_ => println!("unhandled: {}", message),
+            _ => println!("unhandled: {}", message),
         }
     })
     .with_devtools(true)
     .with_url("wry://localhost")?
     .build()?;
-    //_webview.open_devtools();
+    
+    _webview.open_devtools();
 
     event_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Wait;

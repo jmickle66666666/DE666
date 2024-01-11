@@ -1,0 +1,11 @@
+# general
+- make everything (function() {})(); format
+
+# software renderer
+- bresenham circle algo
+- filled triangle
+
+# input
+- mouse
+
+# gui
