@@ -122,6 +122,9 @@ function test_render(draw) {
     }
     draw.text(talkout.get(), 40, 200, Color.yellow);
 
+    draw.line(Input.mouseX, 0, Input.mouseX, 240, Color.yellow);
+    draw.line(0, Input.mouseY, 320, Input.mouseY, Color.yellow);
+
     // draw.texture("face.png", transformOne.x, transformOne.y, null, transformOne.transformation);
 
     // draw.texture("face.png", transformTwo.x, transformTwo.y, null, transformTwo.transformation);

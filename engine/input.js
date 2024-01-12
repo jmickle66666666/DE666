@@ -27,6 +27,24 @@
     Input.keydowns = keydowns;
     Input.printKeypresses = false;
 
+    Input.mouseX = 0;
+    Input.mouseY = 0;
+    let buttons = [];
+    let buttonDowns = [];
+    let buttonUps = [];
+
+    Input.mouseDown = function(button) {
+        return buttonDowns[button];
+    }
+
+    Input.mouseUp = function(button) {
+        return buttonUps[button];
+    }
+
+    Input.mouse = function(button) {
+        return buttons[button];
+    }
+
     window.addEventListener("keydown", (e) => {
         if (!Input.getKey(e.key)) keys.push(e.key);
         keydowns.push(e.key);
@@ -38,9 +56,13 @@
         keyups.push(e.key);
     });
 
-    window.addEventListener("mousemove", (e) => {
-
+    window.addEventListener("load", () => {
+        // document.getElementById("main").addEventListener("mousemove", (e) => {
+        //     Input.mouseX = e.offsetX / e.target.innerWidth;
+        //     Input.mouseY = e.offsetY / e.target.innerHeight;
+        // });
     });
+    
 
     window.Input = Input;
 
