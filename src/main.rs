@@ -26,7 +26,10 @@ fn main() -> wry::Result<()> {
         Err(e) => println!("failed to get current exe path: {e}"),
     };
 
+    #[cfg(not(target_os = "linux"))]
     let builder = WebViewBuilder::new(window);
+    #[cfg(target_os = "linux")]
+    let builder = WebViewBuilder::new_gtk(window.gtk_window());
 
     let _webview = builder
     .with_custom_protocol("wry".into(), move |request| {
