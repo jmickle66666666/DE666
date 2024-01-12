@@ -5,11 +5,12 @@ use tao::{
     dpi::LogicalSize,
     event::{Event, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
+    platform::unix::WindowExtUnix,
     window::{Fullscreen, WindowBuilder},
 };
 use wry::{
     http::{header::CONTENT_TYPE, Response},
-    WebViewBuilder,
+    WebViewBuilder, WebViewBuilderExtUnix,
 };
 
 fn main() -> wry::Result<()> {
