@@ -99,6 +99,7 @@ fn main() -> wry::Result<()> {
         .with_url("wry://localhost")?
         .build()?;
 
+    #[cfg(debug_assertions)]
     _webview.open_devtools();
 
     event_loop.run(move |event, _, control_flow| {
