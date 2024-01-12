@@ -30,7 +30,10 @@ fn main() -> wry::Result<()> {
     #[cfg(not(target_os = "linux"))]
     let builder = WebViewBuilder::new(window);
     #[cfg(target_os = "linux")]
-    let builder = WebViewBuilder::new_gtk(window.gtk_window());
+    let builder = {
+        let vbox = window.default_vbox().unwrap();
+        WebViewBuilder::new_gtk(vbox)
+    };
 
     let _webview = builder
         .with_custom_protocol("wry".into(), move |request| {
