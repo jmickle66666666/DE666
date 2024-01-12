@@ -2,14 +2,14 @@ use std::path::PathBuf;
 
 use http::Request;
 use tao::{
-  event::{Event, WindowEvent},
-  event_loop::{ControlFlow, EventLoop},
-  window::{WindowBuilder, Fullscreen},
-  dpi::LogicalSize,
+    dpi::LogicalSize,
+    event::{Event, WindowEvent},
+    event_loop::{ControlFlow, EventLoop},
+    window::{Fullscreen, WindowBuilder},
 };
 use wry::{
-  http::{header::CONTENT_TYPE, Response},
-  WebViewBuilder,
+    http::{header::CONTENT_TYPE, Response},
+    WebViewBuilder,
 };
 
 fn main() -> wry::Result<()> {
@@ -32,88 +32,84 @@ fn main() -> wry::Result<()> {
     let builder = WebViewBuilder::new_gtk(window.gtk_window());
 
     let _webview = builder
-    .with_custom_protocol("wry".into(), move |request| {
-        
-        match get_wry_response(request) {
-            Ok(r) => r.map(Into::into),
-            Err(e) => {
-                http::Response::builder()
-                .header(CONTENT_TYPE, "text/plain")
-                .status(500)
-                .body(e.to_string().as_bytes().to_vec())
-                .unwrap()
-                .map(Into::into)
-            },
-        }
-    })
-    .with_document_title_changed_handler(|title| {
-        window.set_title(&title.as_str());
-    })
-    .with_ipc_handler(|message| {
-        let parsed = json::parse(&message).unwrap();
+        .with_custom_protocol("wry".into(), move |request| {
+            match get_wry_response(request) {
+                Ok(r) => r.map(Into::into),
+                Err(e) => http::Response::builder()
+                    .header(CONTENT_TYPE, "text/plain")
+                    .status(500)
+                    .body(e.to_string().as_bytes().to_vec())
+                    .unwrap()
+                    .map(Into::into),
+            }
+        })
+        .with_document_title_changed_handler(|title| {
+            window.set_title(&title.as_str());
+        })
+        .with_ipc_handler(|message| {
+            let parsed = json::parse(&message).unwrap();
 
-        // let seperator = message.find(' ').unwrap();
-        // let ident = &message[..seperator];
-        // let body = &message[seperator+1..];
+            // let seperator = message.find(' ').unwrap();
+            // let ident = &message[..seperator];
+            // let body = &message[seperator+1..];
 
-        match parsed["type"].as_str() {
-            Some("echo") => println!("{}", parsed["message"]),
-            Some("window") => {
-                if parsed.has_key("fullscreen") { 
-                    if (parsed["fullscreen"] == "toggle") {
-                        if window.fullscreen() == None {
-                            window.set_fullscreen(Some(Fullscreen::Borderless(None)));
+            match parsed["type"].as_str() {
+                Some("echo") => println!("{}", parsed["message"]),
+                Some("window") => {
+                    if parsed.has_key("fullscreen") {
+                        if (parsed["fullscreen"] == "toggle") {
+                            if window.fullscreen() == None {
+                                window.set_fullscreen(Some(Fullscreen::Borderless(None)));
+                            } else {
+                                window.set_fullscreen(None);
+                            }
                         } else {
-                            window.set_fullscreen(None);
-                        }
-                    } else {
-                        if (parsed["fullscreen"] == true) {
-                            window.set_fullscreen(Some(Fullscreen::Borderless(None)));
-                        }
+                            if (parsed["fullscreen"] == true) {
+                                window.set_fullscreen(Some(Fullscreen::Borderless(None)));
+                            }
 
-                        if (parsed["fullscreen"] == false) {
-                            window.set_fullscreen(None);
+                            if (parsed["fullscreen"] == false) {
+                                window.set_fullscreen(None);
+                            }
                         }
                     }
-                    
-                } 
-                if parsed.has_key("title") {
-                    window.set_title(parsed["title"].as_str().unwrap());
-                } 
-                if parsed.has_key("size") {
-                    let width = parsed["size"]["x"].as_i32().unwrap();
-                    let height = parsed["size"]["y"].as_i32().unwrap();
-                    let new_size = LogicalSize::new(width, height);
-                    window.set_inner_size(new_size);
-                } 
-                if parsed.has_key("resizable") {
-                    window.set_resizable(parsed["resizable"] == true);
+                    if parsed.has_key("title") {
+                        window.set_title(parsed["title"].as_str().unwrap());
+                    }
+                    if parsed.has_key("size") {
+                        let width = parsed["size"]["x"].as_i32().unwrap();
+                        let height = parsed["size"]["y"].as_i32().unwrap();
+                        let new_size = LogicalSize::new(width, height);
+                        window.set_inner_size(new_size);
+                    }
+                    if parsed.has_key("resizable") {
+                        window.set_resizable(parsed["resizable"] == true);
+                    }
                 }
-            },
-            _ => println!("unhandled: {}", message),
-        }
-    })
-    .with_devtools(true)
-    .with_url("wry://localhost")?
-    .build()?;
-    
+                _ => println!("unhandled: {}", message),
+            }
+        })
+        .with_devtools(true)
+        .with_url("wry://localhost")?
+        .build()?;
+
     _webview.open_devtools();
 
     event_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Wait;
 
         if let Event::WindowEvent {
-        event: WindowEvent::CloseRequested,
-        ..
+            event: WindowEvent::CloseRequested,
+            ..
         } = event
         {
-        *control_flow = ControlFlow::Exit
+            *control_flow = ControlFlow::Exit
         }
     });
 }
 
 fn get_wry_response(
-request: Request<Vec<u8>>,
+    request: Request<Vec<u8>>,
 ) -> Result<http::Response<Vec<u8>>, Box<dyn std::error::Error>> {
     let path = request.uri().path();
     // Read the file content from file path
@@ -144,7 +140,7 @@ request: Request<Vec<u8>>,
     if mimetype == "unknown" {
         match infer::get_from_path(path) {
             Ok(Some(info)) => {
-                mimetype = info.mime_type(); 
+                mimetype = info.mime_type();
             }
             Ok(None) => {
                 eprintln!("Unknown file type {}", path);
@@ -184,8 +180,8 @@ request: Request<Vec<u8>>,
     //     println!("uknown type{}", path);
     // }
 
-Response::builder()
-    .header(CONTENT_TYPE, mimetype)
-    .body(content)
-    .map_err(Into::into)
+    Response::builder()
+        .header(CONTENT_TYPE, mimetype)
+        .body(content)
+        .map_err(Into::into)
 }
