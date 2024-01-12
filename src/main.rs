@@ -5,13 +5,15 @@ use tao::{
     dpi::LogicalSize,
     event::{Event, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
-    platform::unix::WindowExtUnix,
     window::{Fullscreen, WindowBuilder},
 };
 use wry::{
     http::{header::CONTENT_TYPE, Response},
-    WebViewBuilder, WebViewBuilderExtUnix,
+    WebViewBuilder,
 };
+
+#[cfg(target_os = "linux")]
+use {tao::platform::unix::WindowExtUnix, wry::WebViewBuilderExtUnix};
 
 fn main() -> wry::Result<()> {
     let event_loop = EventLoop::new();
