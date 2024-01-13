@@ -198,6 +198,9 @@
                 y = a; x = Math.floor(x1 + b);
             }
 
+            if (x < 0 || x >= imgData.width) continue;
+            if (y < 0 || y >= imgData.height) continue;
+            
             const index = ((y * imgData.width) + Math.floor(x)) * 4;
             if (!staticColor) {
                 c = SoftwareRenderer.mixColor(c1, c2, perc);

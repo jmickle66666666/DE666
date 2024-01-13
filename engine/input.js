@@ -8,6 +8,8 @@
     Input.reset = function () {
         keydowns = [];
         keyups = [];
+        buttonDowns = [];
+        buttonUps = [];
     }
 
     Input.getKeyDown = function(key) {
@@ -56,14 +58,27 @@
         keyups.push(e.key);
     });
 
+    let mainElement = null;
+
     window.addEventListener("load", () => {
-        // document.getElementById("main").addEventListener("mousemove", (e) => {
-        //     Input.mouseX = e.offsetX / e.target.innerWidth;
-        //     Input.mouseY = e.offsetY / e.target.innerHeight;
-        // });
+        mainElement = document.getElementById("main");
+    });
+
+    window.addEventListener("mousemove", (e) => {
+        Input.mouseX = (e.clientX - parseInt(mainElement.style.left)) / parseInt(mainElement.style.width) * Draw.canvas.width;
+        Input.mouseY = (e.clientY - parseInt(mainElement.style.top)) / parseInt(mainElement.style.height) * Draw.canvas.height;
+    });
+
+    window.addEventListener("mousedown", (e) => {
+        buttonDowns[e.button] = true;
+        buttons[e.button] = true;
+    });
+
+    window.addEventListener("mouseup", (e) => {
+        buttonUps[e.button] = true;
+        buttons[e.button] = false;
     });
     
-
     window.Input = Input;
 
 })();

@@ -122,8 +122,16 @@ function test_render(draw) {
     }
     draw.text(talkout.get(), 40, 200, Color.yellow);
 
-    draw.line(Input.mouseX, 0, Input.mouseX, 240, Color.yellow);
-    draw.line(0, Input.mouseY, 320, Input.mouseY, Color.yellow);
+    let mcolor = Color.yellow;
+    if (Input.mouse(0)) mcolor = Color.red;
+    if (Input.mouseUp(0)) mcolor = Color.black;
+    if (Input.mouseDown(0)) mcolor = Color.white;
+    if (Input.mouse(2)) mcolor = Color.brown;
+    if (Input.mouseUp(2)) mcolor = Color.maroon;
+    if (Input.mouseDown(2)) mcolor = Color.blue;
+
+    draw.line(Input.mouseX, 0, Input.mouseX, 240, mcolor);
+    draw.line(0, Input.mouseY, 320, Input.mouseY, mcolor);
 
     // draw.texture("face.png", transformOne.x, transformOne.y, null, transformOne.transformation);
 
