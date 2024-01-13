@@ -1,4 +1,3 @@
-#![allow(non_snake_case)]
 use std::path::PathBuf;
 
 use http::Request;
@@ -18,10 +17,7 @@ use {tao::platform::unix::WindowExtUnix, wry::WebViewBuilderExtUnix};
 
 fn main() -> wry::Result<()> {
     let event_loop = EventLoop::new();
-    // let window = Arc::new(WindowBuilder::new().build(&event_loop).unwrap());
     let window = Box::leak(Box::new(WindowBuilder::new().build(&event_loop).unwrap()));
-    // let weak_window = Arc::downgrade(&window);
-    // let weak_window2 = Arc::downgrade(&window);
 
     use std::env;
 
@@ -56,44 +52,37 @@ fn main() -> wry::Result<()> {
         .with_ipc_handler(|message| {
             let parsed = json::parse(&message).unwrap();
 
-            // let seperator = message.find(' ').unwrap();
-            // let ident = &message[..seperator];
-            // let body = &message[seperator+1..];
+            if parsed.has_key("fullscreen") {
+                if parsed["fullscreen"] == "toggle" {
+                    if window.fullscreen() == None {
+                        window.set_fullscreen(Some(Fullscreen::Borderless(None)));
+                    } else {
+                        window.set_fullscreen(None);
+                    }
+                } else {
+                    if parsed["fullscreen"] == true {
+                        window.set_fullscreen(Some(Fullscreen::Borderless(None)));
+                    }
 
-            match parsed["type"].as_str() {
-                Some("echo") => println!("{}", parsed["message"]),
-                Some("window") => {
-                    if parsed.has_key("fullscreen") {
-                        if parsed["fullscreen"] == "toggle" {
-                            if window.fullscreen() == None {
-                                window.set_fullscreen(Some(Fullscreen::Borderless(None)));
-                            } else {
-                                window.set_fullscreen(None);
-                            }
-                        } else {
-                            if parsed["fullscreen"] == true {
-                                window.set_fullscreen(Some(Fullscreen::Borderless(None)));
-                            }
-
-                            if parsed["fullscreen"] == false {
-                                window.set_fullscreen(None);
-                            }
-                        }
-                    }
-                    if parsed.has_key("title") {
-                        window.set_title(parsed["title"].as_str().unwrap());
-                    }
-                    if parsed.has_key("size") {
-                        let width = parsed["size"]["x"].as_i32().unwrap();
-                        let height = parsed["size"]["y"].as_i32().unwrap();
-                        let new_size = LogicalSize::new(width, height);
-                        window.set_inner_size(new_size);
-                    }
-                    if parsed.has_key("resizable") {
-                        window.set_resizable(parsed["resizable"] == true);
+                    if parsed["fullscreen"] == false {
+                        window.set_fullscreen(None);
                     }
                 }
-                _ => println!("unhandled: {}", message),
+            }
+
+            if parsed.has_key("title") {
+                window.set_title(parsed["title"].as_str().unwrap());
+            }
+
+            if parsed.has_key("size") {
+                let width = parsed["size"]["x"].as_i32().unwrap();
+                let height = parsed["size"]["y"].as_i32().unwrap();
+                let new_size = LogicalSize::new(width, height);
+                window.set_inner_size(new_size);
+            }
+
+            if parsed.has_key("resizable") {
+                window.set_resizable(parsed["resizable"] == true);
             }
         })
         .with_devtools(true)
@@ -102,6 +91,8 @@ fn main() -> wry::Result<()> {
 
     #[cfg(debug_assertions)]
     _webview.open_devtools();
+
+    _webview.evaluate_script("let test = 'hello';").unwrap();
 
     event_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Wait;
@@ -138,6 +129,8 @@ fn get_wry_response(
     } else if path.ends_with(".css") {
         "text/css"
     } else if path.ends_with(".txt") {
+        "text/plain"
+    } else if path.ends_with(".ini") {
         "text/plain"
     } else if path.ends_with(".json") {
         "text/plain"

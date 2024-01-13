@@ -29,6 +29,24 @@ window.onload = () => {
     load_renderer(CanvasRenderer);
     fit_canvas(document.getElementById("main"));
     window.setInterval(tick, 1000/60);
+
+    fetch("disaster.ini").then(response => response.text()).then((data) =>{
+        let config = new INI(data);
+
+        let resolution = config.getProperty("resolution");
+        if (resolution != null && resolution.indexOf("x") != -1) {
+            Engine.setSize(
+                parseInt(resolution.split('x')[0]),
+                parseInt(resolution.split('x')[1])
+            );
+        }
+
+        let renderer = config.getProperty("renderer").toLowerCase();
+        if (renderer == "software") load_renderer(SoftwareRenderer);
+        if (renderer == "canvas") load_renderer(CanvasRenderer);
+        
+        Engine.setFullscreen(config.getProperty("fullscreen") == "true");
+    });
 }
 
 let lasttick = 0;

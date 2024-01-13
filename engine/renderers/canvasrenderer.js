@@ -166,6 +166,11 @@
             ctx.strokeStyle = gradient; 
         }
         ctx.stroke();
+
+        ctx.fillStyle = color;
+        ctx.fillRect(x1-0.5, y1-0.5, 1, 1);
+        ctx.fillStyle = colorEnd;
+        ctx.fillRect(x2-0.5, y2-0.5, 1, 1);
     }
 
     CanvasRenderer.text = function (text, x, y, color) {

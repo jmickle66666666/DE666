@@ -156,10 +156,10 @@
     }
 
     SoftwareRenderer.line = function (x1, y1, x2, y2, color, colorEnd) {
-        x1 = Math.floor(x1);
-        x2 = Math.floor(x2);
-        y1 = Math.floor(y1);
-        y2 = Math.floor(y2);
+        x1 = Math.round(x1);
+        x2 = Math.round(x2);
+        y1 = Math.round(y1);
+        y2 = Math.round(y2);
 
         const width = x2 - x1;
         const height = y2 - y1;
@@ -200,7 +200,7 @@
 
             if (x < 0 || x >= imgData.width) continue;
             if (y < 0 || y >= imgData.height) continue;
-            
+
             const index = ((y * imgData.width) + Math.floor(x)) * 4;
             if (!staticColor) {
                 c = SoftwareRenderer.mixColor(c1, c2, perc);
