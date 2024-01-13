@@ -1,3 +1,4 @@
+#![allow(non_snake_case)]
 use std::path::PathBuf;
 
 use http::Request;
@@ -63,18 +64,18 @@ fn main() -> wry::Result<()> {
                 Some("echo") => println!("{}", parsed["message"]),
                 Some("window") => {
                     if parsed.has_key("fullscreen") {
-                        if (parsed["fullscreen"] == "toggle") {
+                        if parsed["fullscreen"] == "toggle" {
                             if window.fullscreen() == None {
                                 window.set_fullscreen(Some(Fullscreen::Borderless(None)));
                             } else {
                                 window.set_fullscreen(None);
                             }
                         } else {
-                            if (parsed["fullscreen"] == true) {
+                            if parsed["fullscreen"] == true {
                                 window.set_fullscreen(Some(Fullscreen::Borderless(None)));
                             }
 
-                            if (parsed["fullscreen"] == false) {
+                            if parsed["fullscreen"] == false {
                                 window.set_fullscreen(None);
                             }
                         }
