@@ -33,11 +33,11 @@ window.onload = () => {
     fetch("disaster.ini").then(response => response.text()).then((data) =>{
         let config = new INI(data);
 
-        let resolution = config.getProperty("resolution");
-        if (resolution != null && resolution.indexOf("x") != -1) {
+        let windowsize = config.getProperty("windowsize");
+        if (windowsize != null && windowsize.indexOf("x") != -1) {
             Engine.setSize(
-                parseInt(resolution.split('x')[0]),
-                parseInt(resolution.split('x')[1])
+                parseInt(windowsize.split('x')[0]),
+                parseInt(windowsize.split('x')[1])
             );
         }
 

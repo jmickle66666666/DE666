@@ -4,7 +4,7 @@ use http::Request;
 use tao::{
     dpi::LogicalSize,
     event::{Event, WindowEvent},
-    event_loop::{ControlFlow, EventLoop},
+    event_loop::{ControlFlow, EventLoopBuilder},
     window::{Fullscreen, WindowBuilder},
 };
 use wry::{
@@ -16,7 +16,7 @@ use wry::{
 use {tao::platform::unix::WindowExtUnix, wry::WebViewBuilderExtUnix};
 
 fn main() -> wry::Result<()> {
-    let event_loop = EventLoop::new();
+    let event_loop = EventLoopBuilder::with_user_event().build();
     let window = Box::leak(Box::new(WindowBuilder::new().build(&event_loop).unwrap()));
 
     use std::env;
@@ -33,6 +33,8 @@ fn main() -> wry::Result<()> {
         let vbox = window.default_vbox().unwrap();
         WebViewBuilder::new_gtk(vbox)
     };
+
+    let event_proxy = Box::leak(Box::new(event_loop.create_proxy()));
 
     let _webview = builder
         .with_custom_protocol("wry".into(), move |request| {
@@ -84,6 +86,10 @@ fn main() -> wry::Result<()> {
             if parsed.has_key("resizable") {
                 window.set_resizable(parsed["resizable"] == true);
             }
+
+            if parsed.has_key("quit") {
+                event_proxy.send_event("quit").unwrap();
+            }
         })
         .with_devtools(true)
         .with_url("wry://localhost")?
@@ -103,6 +109,13 @@ fn main() -> wry::Result<()> {
         } = event
         {
             *control_flow = ControlFlow::Exit
+        }
+
+        if let Event::UserEvent(message) = event
+        {
+            if message == "quit" {
+                *control_flow = ControlFlow::Exit
+            }
         }
     });
 }

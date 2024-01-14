@@ -14,6 +14,7 @@
     Engine.setResizable = function(enabled) { ipcMessage({resizable: enabled}); }
     Engine.setTitle = function(title) { ipcMessage({title: title}); }
     Engine.setSize = function(x, y) { ipcMessage({size: {x:x, y:y}}); }
+    Engine.quit = function() { ipcMessage({quit:"please"}); }
 
     window.Engine = Engine;
 })();
