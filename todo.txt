@@ -3,3 +3,37 @@
 - filled triangle
 
 # gui
+
+gui elements
+
+seperate element controls and layout controls
+
+NECESSARY
+
+label
+button
+slider
+image
+checkbox
+
+
+MORE
+
+radio button
+combobox
+progressbar
+
+
+HARD
+
+textinput
+number input
+color picker
+
+
+META
+
+window/rect
+foldout (details/summary)
+menubar (begin, menuitem(s), end)
+scrollbox for child elements
