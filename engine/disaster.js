@@ -82,7 +82,6 @@ let talkout = {
     get:function(){return this.text.split(' ').slice(0, this.words).join(' ');}
 }
 
-let testValue = 50;
 
 function test_render(draw) {
     //draw.clear();

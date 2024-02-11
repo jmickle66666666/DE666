@@ -17,6 +17,19 @@ use wry::{
 #[cfg(target_os = "linux")]
 use {tao::platform::unix::WindowExtUnix, wry::WebViewBuilderExtUnix};
 
+#[derive(Debug)]
+struct EventMessage {
+    message_type : String,
+    data : String
+}
+
+fn event_message(message_type: &str, data: &str) -> EventMessage {
+    return EventMessage {
+        message_type: message_type.to_string(),
+        data: data.to_string(),
+    }
+}
+
 fn main() -> wry::Result<()> {
     let event_loop = EventLoopBuilder::with_user_event().build();
     let window = Box::leak(Box::new(WindowBuilder::new().build(&event_loop).unwrap()));
@@ -38,6 +51,7 @@ fn main() -> wry::Result<()> {
 
     let event_proxy = Box::leak(Box::new(event_loop.create_proxy()));
 
+    // let _webview : &mut wry::WebView;
     let _webview = builder
         .with_custom_protocol("wry".into(), move |request| {
             match get_wry_response(request) {
@@ -59,6 +73,10 @@ fn main() -> wry::Result<()> {
             if parsed.has_key("message") {
 
                 match parsed["message"].as_str().unwrap() {
+                    "echo" => {
+                        println!("{}", parsed["data"].as_str().unwrap());
+                    }
+
                     "fullscreen" => {
                         if parsed["fullscreen"] == "toggle" {
                             if window.fullscreen() == None {
@@ -93,14 +111,16 @@ fn main() -> wry::Result<()> {
                     }
 
                     "quit" => {
-                        event_proxy.send_event("quit").unwrap();
+                        event_proxy.send_event(
+                            event_message("quit", "none")
+                        ).unwrap();
                     }
 
-                    "write_file" => {
+                    "file_write" => {
                         let path = parsed["path"].as_str().unwrap();
                         let data = parsed["data"].as_str().unwrap();
                         
-                        let mut file = File::create(path);
+                        let file = File::create(path);
                         match file {
                             Ok(mut f) => { 
                                 if let Err(e) = f.write_all(data.as_bytes()) {
@@ -111,9 +131,20 @@ fn main() -> wry::Result<()> {
                                 println!("error opening file: {e:?}")
                             }
                         }
+                    }
 
-                        
+                    "file_read" => {
+                        let path = parsed["path"].as_str().unwrap();
+                        let mut file = File::open(path).unwrap();
+                        let mut data = String::new();
+                        file.read_to_string(&mut data).unwrap();
 
+                        event_proxy.send_event(
+                            event_message(
+                                "eval", 
+                                format!("window.dispatchEvent(new CustomEvent('fileread', {{ detail:'{data}' }}));").as_str()
+                            )
+                        ).unwrap();
                     }
 
                     _ => {
@@ -144,9 +175,20 @@ fn main() -> wry::Result<()> {
 
         if let Event::UserEvent(message) = event
         {
-            if message == "quit" {
-                *control_flow = ControlFlow::Exit
+            match message.message_type.as_str() {
+                "quit" => {
+                    *control_flow = ControlFlow::Exit
+                }
+                "eval" => {
+                    //println!("{}", message.data);
+                    _webview.evaluate_script(&message.data).unwrap();
+                }
+                _ => {
+                    println!("unknown event type: {}", message.message_type)   
+                }
             }
+
+
         }
     });
 }
@@ -230,3 +272,4 @@ fn get_wry_response(
         .body(content)
         .map_err(Into::into)
 }
+
