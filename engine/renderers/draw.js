@@ -3,6 +3,7 @@
     let ctx = null;
     let canvas = null;
     window.Draw = { name: "None", canvas: null };
+    Draw.font = {height:0, width:0};
 
     Draw.init = function(width, height, targetElement) {}
     Draw.resize = function(width, height) {}

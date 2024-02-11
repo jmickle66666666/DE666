@@ -81,6 +81,9 @@ let talkout = {
     next:function() { this.words += 1;}, 
     get:function(){return this.text.split(' ').slice(0, this.words).join(' ');}
 }
+
+let testValue = 50;
+
 function test_render(draw) {
     //draw.clear();
     // draw.rect(0, 0, 320, 240, "gray", true);
@@ -150,6 +153,11 @@ function test_render(draw) {
 
     draw.line(Input.mouseX, 0, Input.mouseX, 240, mcolor);
     draw.line(0, Input.mouseY, 320, Input.mouseY, mcolor);
+
+    GUI.label(10, 10, "hello");
+    if (GUI.button(10, 40, "ftest")) { console.log("hi!"); }
+
+    testValue = GUI.slider(10, 24, 100, 10, testValue, 0, 100);
 
     // draw.texture("face.png", transformOne.x, transformOne.y, null, transformOne.transformation);
 

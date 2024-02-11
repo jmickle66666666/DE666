@@ -10,8 +10,6 @@ seperate element controls and layout controls
 
 NECESSARY
 
-label
-button
 slider
 image
 checkbox

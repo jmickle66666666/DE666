@@ -118,7 +118,7 @@
         color = color.toRgbString();
         if (filled) {
             ctx.fillStyle = color; 
-            ctx.fillRect(x+0.5, y+0.5, width, height);
+            ctx.fillRect(x, y, width, height);
         } else {
             ctx.strokeStyle = color;
             ctx.strokeRect(x+0.5, y+0.5, width, height);
@@ -149,10 +149,16 @@
         y1 = Math.round(y1);
         y2 = Math.round(y2);
 
+        // fit to pixel grid
         y1 += 0.5;
         y2 += 0.5;
         x1 += 0.5;
         x2 += 0.5;
+
+        // fix inconsistency in line length
+        let dx = x2 - x1;
+        let dy = y2 - y1;
+        if (dy > dx) y2 -= 0.5; else x2 -= 0.5;
         
         ctx.beginPath();
         ctx.moveTo(x1, y1);
@@ -169,8 +175,8 @@
 
         ctx.fillStyle = color;
         ctx.fillRect(x1-0.5, y1-0.5, 1, 1);
-        ctx.fillStyle = colorEnd;
-        ctx.fillRect(x2-0.5, y2-0.5, 1, 1);
+        // ctx.fillStyle = colorEnd;
+        // ctx.fillRect(x2-0.5, y2-0.5, 1, 1);
     }
 
     CanvasRenderer.text = function (text, x, y, color) {
