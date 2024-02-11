@@ -9,12 +9,14 @@
         window.ipc.postMessage(JSON.stringify(object));
     }
 
-    Engine.setFullscreen = function(enabled) { ipcMessage({fullscreen: enabled}); }
-    Engine.toggleFullscreen = function() { ipcMessage({fullscreen: "toggle"}); }
-    Engine.setResizable = function(enabled) { ipcMessage({resizable: enabled}); }
-    Engine.setTitle = function(title) { ipcMessage({title: title}); }
-    Engine.setSize = function(x, y) { ipcMessage({size: {x:x, y:y}}); }
-    Engine.quit = function() { ipcMessage({quit:"please"}); }
+    Engine.setFullscreen = function(enabled) { ipcMessage({message: "fullscreen", fullscreen: enabled}); }
+    Engine.toggleFullscreen = function() { ipcMessage({message: "fullscreen", fullscreen: "toggle"}); }
+    Engine.setResizable = function(enabled) { ipcMessage({message: "resizable", resizable: enabled}); }
+    Engine.setTitle = function(title) { ipcMessage({message: "title", title: title}); }
+    Engine.setSize = function(x, y) { ipcMessage({message: "size", size: {x:x, y:y}}); }
+    Engine.quit = function() { ipcMessage({message:"quit"}); }
+
+    Engine.writeFileText = function(path, data) { ipcMessage({message:"write_file", path:path, data:data}); }
 
     window.Engine = Engine;
 })();

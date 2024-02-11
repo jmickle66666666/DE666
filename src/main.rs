@@ -1,4 +1,6 @@
 use std::path::PathBuf;
+use std::fs::File;
+use std::io::prelude::*;
 
 use http::Request;
 use tao::{
@@ -54,41 +56,70 @@ fn main() -> wry::Result<()> {
         .with_ipc_handler(|message| {
             let parsed = json::parse(&message).unwrap();
 
-            if parsed.has_key("fullscreen") {
-                if parsed["fullscreen"] == "toggle" {
-                    if window.fullscreen() == None {
-                        window.set_fullscreen(Some(Fullscreen::Borderless(None)));
-                    } else {
-                        window.set_fullscreen(None);
-                    }
-                } else {
-                    if parsed["fullscreen"] == true {
-                        window.set_fullscreen(Some(Fullscreen::Borderless(None)));
+            if parsed.has_key("message") {
+
+                match parsed["message"].as_str().unwrap() {
+                    "fullscreen" => {
+                        if parsed["fullscreen"] == "toggle" {
+                            if window.fullscreen() == None {
+                                window.set_fullscreen(Some(Fullscreen::Borderless(None)));
+                            } else {
+                                window.set_fullscreen(None);
+                            }
+                        } else {
+                            if parsed["fullscreen"] == true {
+                                window.set_fullscreen(Some(Fullscreen::Borderless(None)));
+                            }
+        
+                            if parsed["fullscreen"] == false {
+                                window.set_fullscreen(None);
+                            }
+                        }
                     }
 
-                    if parsed["fullscreen"] == false {
-                        window.set_fullscreen(None);
+                    "title" => {
+                        window.set_title(parsed["title"].as_str().unwrap());
+                    }
+
+                    "size" => {
+                        let width = parsed["size"]["x"].as_i32().unwrap();
+                        let height = parsed["size"]["y"].as_i32().unwrap();
+                        let new_size = LogicalSize::new(width, height);
+                        window.set_inner_size(new_size);
+                    }
+
+                    "resizable" => {
+                        window.set_resizable(parsed["resizable"] == true);
+                    }
+
+                    "quit" => {
+                        event_proxy.send_event("quit").unwrap();
+                    }
+
+                    "write_file" => {
+                        let path = parsed["path"].as_str().unwrap();
+                        let data = parsed["data"].as_str().unwrap();
+                        
+                        let mut file = File::create(path);
+                        match file {
+                            Ok(mut f) => { 
+                                if let Err(e) = f.write_all(data.as_bytes()) {
+                                    println!("error writing data: {e:?}")
+                                }
+                            }
+                            Err(e) => {
+                                println!("error opening file: {e:?}")
+                            }
+                        }
+
+                        
+
+                    }
+
+                    _ => {
+                        println!("unknown message: {}", parsed["message"].as_str().unwrap())
                     }
                 }
-            }
-
-            if parsed.has_key("title") {
-                window.set_title(parsed["title"].as_str().unwrap());
-            }
-
-            if parsed.has_key("size") {
-                let width = parsed["size"]["x"].as_i32().unwrap();
-                let height = parsed["size"]["y"].as_i32().unwrap();
-                let new_size = LogicalSize::new(width, height);
-                window.set_inner_size(new_size);
-            }
-
-            if parsed.has_key("resizable") {
-                window.set_resizable(parsed["resizable"] == true);
-            }
-
-            if parsed.has_key("quit") {
-                event_proxy.send_event("quit").unwrap();
             }
         })
         .with_devtools(true)
