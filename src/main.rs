@@ -1,5 +1,6 @@
 use std::path::PathBuf;
 use std::fs::File;
+use std::fs::read_dir;
 use std::io::prelude::*;
 
 use http::Request;
@@ -143,6 +144,23 @@ fn main() -> wry::Result<()> {
                             event_message(
                                 "eval", 
                                 format!("window.dispatchEvent(new CustomEvent('fileread', {{ detail:'{data}' }}));").as_str()
+                            )
+                        ).unwrap();
+                    }
+
+                    "path_list" => {
+                        let path = parsed["path"].as_str().unwrap();
+                        let paths = read_dir(path).unwrap();
+                        let mut output = Vec::new();
+                        for dirEntry in paths {
+                            // these unwraps are fine honest
+                            output.push(dirEntry.unwrap().path().into_os_string().into_string().unwrap());
+                        } 
+                        let output_string = output.join(",");
+                        event_proxy.send_event(
+                            event_message(
+                                "eval", 
+                                format!("window.dispatchEvent(new CustomEvent('pathlist', {{ detail:'{output_string}' }}));").as_str()
                             )
                         ).unwrap();
                     }

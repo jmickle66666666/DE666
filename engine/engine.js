@@ -28,6 +28,15 @@
         
         ipcMessage({message:"file_read", path:path}); 
     }
+    Engine.listFilesInDir = function(path, callback) {
+        let listener = function(e) {
+            callback(e.detail.split(','));
+            window.removeEventListener("pathlist", listener);
+        };
+        window.addEventListener("pathlist", listener);
+        
+        ipcMessage({message:"path_list", path:path}); 
+    }
     // Engine.fileExists = function(path) { ipcMessage({message:"file_exists", path:path}); }
     // Engine.fileDelete = function(path) { ipcMessage({message:"file_delete", path:path}); }
 
