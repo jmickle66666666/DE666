@@ -47,6 +47,8 @@ window.onload = () => {
         
         Engine.setFullscreen(config.getProperty("fullscreen") == "true");
     });
+
+    Engine.setIcon("sasha/icontest.png");
 }
 
 let lasttick = 0;

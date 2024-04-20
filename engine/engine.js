@@ -14,6 +14,7 @@
     Engine.setFullscreen = function(enabled) { ipcMessage({message: "fullscreen", fullscreen: enabled}); }
     Engine.toggleFullscreen = function() { ipcMessage({message: "fullscreen", fullscreen: "toggle"}); }
     Engine.setTitle = function(title) { ipcMessage({message: "title", title: title}); }
+    Engine.setIcon = function(iconPath) { ipcMessage({message: "icon", icon: iconPath}); }
     Engine.setSize = function(x, y) { ipcMessage({message: "size", size: {x:x, y:y}}); }
     Engine.setResizable = function(enabled) { ipcMessage({message: "resizable", resizable: enabled}); }
     Engine.quit = function() { ipcMessage({message:"quit"}); }

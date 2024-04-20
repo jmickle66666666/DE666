@@ -8,12 +8,13 @@ use tao::{
     dpi::LogicalSize,
     event::{Event, WindowEvent},
     event_loop::{ControlFlow, EventLoopBuilder},
-    window::{Fullscreen, WindowBuilder},
+    window::{Fullscreen, WindowBuilder, Icon},
 };
 use wry::{
     http::{header::CONTENT_TYPE, Response},
     WebViewBuilder,
 };
+use image::io::Reader as ImageReader;
 
 #[cfg(target_os = "linux")]
 use {tao::platform::unix::WindowExtUnix, wry::WebViewBuilderExtUnix};
@@ -98,6 +99,17 @@ fn main() -> wry::Result<()> {
 
                     "title" => {
                         window.set_title(parsed["title"].as_str().unwrap());
+                    }
+
+                    "icon" => {
+                        let img = match ImageReader::open(parsed["icon"].as_str().unwrap()) {
+                            Ok(image) => image,
+                            Err(e) => panic!(),
+                        };
+                        let img_out = img.decode().expect("");
+                        let w = img_out.width();
+                        let h = img_out.height();
+                        window.set_window_icon(Some(Icon::from_rgba(img_out.into_bytes(), w, h).unwrap()));
                     }
 
                     "size" => {
