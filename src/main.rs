@@ -155,7 +155,7 @@ fn main() -> wry::Result<()> {
                         event_proxy.send_event(
                             event_message(
                                 "eval", 
-                                format!("window.dispatchEvent(new CustomEvent('fileread', {{ detail:'{data}' }}));").as_str()
+                                format!("window.dispatchEvent(new CustomEvent('fileread', {{ detail:String.raw`{data}` }}));").as_str()
                             )
                         ).unwrap();
                     }

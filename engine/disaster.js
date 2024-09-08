@@ -30,7 +30,7 @@ window.onload = () => {
     fit_canvas(document.getElementById("main"));
     window.setInterval(tick, 1000/60);
 
-    fetch("disaster.ini").then(response => response.text()).then((data) =>{
+    Engine.fileReadText("disaster.ini", (data) =>{
         let config = new INI(data);
 
         let windowsize = config.getProperty("windowsize");
@@ -46,6 +46,8 @@ window.onload = () => {
         if (renderer == "canvas") load_renderer(CanvasRenderer);
         
         Engine.setFullscreen(config.getProperty("fullscreen") == "true");
+
+        console.log("hi");
     });
 
     Engine.setIcon("sasha/icontest.png");
