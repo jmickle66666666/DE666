@@ -1,12 +1,18 @@
 (function () {
     var Engine = {}
+    var eventCount = 0;
     
     Engine.getTime = function () {
         return Date.now() / 1000;
     }
 
     function ipcMessage(object) {
-        window.ipc.postMessage(JSON.stringify(object));
+        if (window.ipc != null) window.ipc.postMessage(JSON.stringify(object));
+    }
+
+    function nextEventName() {
+        eventCount += 1;
+        return "listener_"+eventCount;
     }
 
     Engine.echo = function(message)  {ipcMessage({message:"echo", data:message})};
@@ -21,13 +27,24 @@
 
     Engine.fileWriteText = function(path, data) { ipcMessage({message:"file_write", path:path, data:data}); }
     Engine.fileReadText = function(path, callback) {
+        let eventName = nextEventName();
         let listener = function(e) {
             callback(e.detail);
-            window.removeEventListener("fileread", listener);
+            window.removeEventListener(eventName, listener);
         };
-        window.addEventListener("fileread", listener);
+        window.addEventListener(eventName, listener);
         
-        ipcMessage({message:"file_read", path:path}); 
+        ipcMessage({message:"file_read", path:path, return:eventName}); 
+    }
+    Engine.fileReadBytes = function(path, callback) {
+        let eventName = nextEventName();
+        let listener = function(e) {
+            callback(e.detail);
+            window.removeEventListener(eventName, listener);
+        }
+        window.addEventListener(eventName, listener);
+
+        ipcMessage({message:"file_read_bytes", path:path, return:eventName});
     }
     Engine.listFilesInDir = function(path, callback) {
         let listener = function(e) {

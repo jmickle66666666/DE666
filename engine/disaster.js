@@ -50,6 +50,12 @@ window.onload = () => {
         console.log("hi");
     });
 
+    Engine.fileReadBytes("D:/becamehater.png", (data) => {
+        let image = document.createElement("img");
+        image.src = 'data:image/png;base64,'+data;
+        document.body.appendChild(image);
+    })
+
     Engine.setIcon("sasha/icontest.png");
 }
 

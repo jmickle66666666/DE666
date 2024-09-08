@@ -2,6 +2,7 @@ use std::path::PathBuf;
 use std::fs::File;
 use std::fs::read_dir;
 use std::io::prelude::*;
+use base64::prelude::*;
 
 use http::Request;
 use tao::{
@@ -104,7 +105,7 @@ fn main() -> wry::Result<()> {
                     "icon" => {
                         let img = match ImageReader::open(parsed["icon"].as_str().unwrap()) {
                             Ok(image) => image,
-                            Err(e) => panic!(),
+                            Err(_e) => panic!(),
                         };
                         let img_out = img.decode().expect("");
                         let w = img_out.width();
@@ -152,10 +153,26 @@ fn main() -> wry::Result<()> {
                         let mut data = String::new();
                         file.read_to_string(&mut data).unwrap();
 
+                        let return_event = parsed["return"].as_str().unwrap();
+
                         event_proxy.send_event(
                             event_message(
                                 "eval", 
-                                format!("window.dispatchEvent(new CustomEvent('fileread', {{ detail:String.raw`{data}` }}));").as_str()
+                                format!("window.dispatchEvent(new CustomEvent('{return_event}', {{ detail:String.raw`{data}` }}));").as_str()
+                            )
+                        ).unwrap();
+                    }
+
+                    "file_read_bytes" => {
+                        let path = parsed["path"].as_str().unwrap();
+                        let data = std::fs::read(path).unwrap();
+                        let return_event = parsed["return"].as_str().unwrap();
+                        let base64 = BASE64_STANDARD.encode(data);
+
+                        event_proxy.send_event(
+                            event_message(
+                                "eval", 
+                                format!("window.dispatchEvent(new CustomEvent('{return_event}', {{ detail:String.raw`{base64}` }}));").as_str()
                             )
                         ).unwrap();
                     }
@@ -164,9 +181,9 @@ fn main() -> wry::Result<()> {
                         let path = parsed["path"].as_str().unwrap();
                         let paths = read_dir(path).unwrap();
                         let mut output = Vec::new();
-                        for dirEntry in paths {
+                        for dir_entry in paths {
                             // these unwraps are fine honest
-                            output.push(dirEntry.unwrap().path().into_os_string().into_string().unwrap());
+                            output.push(dir_entry.unwrap().path().into_os_string().into_string().unwrap());
                         } 
                         let output_string = output.join(",");
                         event_proxy.send_event(
