@@ -154,11 +154,12 @@ fn main() -> wry::Result<()> {
                         file.read_to_string(&mut data).unwrap();
 
                         let return_event = parsed["return"].as_str().unwrap();
+                        let new_data = str::replace(data.as_str(), "$", "\\$");
 
                         event_proxy.send_event(
                             event_message(
                                 "eval", 
-                                format!("window.dispatchEvent(new CustomEvent('{return_event}', {{ detail:String.raw`{data}` }}));").as_str()
+                                format!("window.dispatchEvent(new CustomEvent('{return_event}', {{ detail:String.raw`{new_data}` }}));").as_str()
                             )
                         ).unwrap();
                     }
