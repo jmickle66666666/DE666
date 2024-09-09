@@ -149,7 +149,12 @@ fn main() -> wry::Result<()> {
 
                     "file_read" => {
                         let path = parsed["path"].as_str().unwrap();
-                        let mut file = File::open(path).unwrap();
+                        
+                        let mut file = match File::open(path) {
+                            Err(_e) => {println!("Cannot find the path: {}", path); return;},
+                            Ok(f) => f,
+                        };
+
                         let mut data = String::new();
                         file.read_to_string(&mut data).unwrap();
 
@@ -166,7 +171,10 @@ fn main() -> wry::Result<()> {
 
                     "file_read_bytes" => {
                         let path = parsed["path"].as_str().unwrap();
-                        let data = std::fs::read(path).unwrap();
+                        let data = match std::fs::read(path) {
+                            Err(_e) => {println!("Cannot find the path: {}", path); return;},
+                            Ok(f) => f,
+                        };
                         let return_event = parsed["return"].as_str().unwrap();
                         let base64 = BASE64_STANDARD.encode(data);
 
@@ -180,7 +188,10 @@ fn main() -> wry::Result<()> {
 
                     "path_list" => {
                         let path = parsed["path"].as_str().unwrap();
-                        let paths = read_dir(path).unwrap();
+                        let paths = match read_dir(path){
+                            Err(e) => {println!("Cannot find the path: {}", path); return;},
+                            Ok(f) => f,
+                        };
                         let mut output = Vec::new();
                         for dir_entry in paths {
                             // these unwraps are fine honest
