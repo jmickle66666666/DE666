@@ -150,15 +150,26 @@ fn main() -> wry::Result<()> {
                     "file_read" => {
                         let path = parsed["path"].as_str().unwrap();
                         
+                        let return_event = parsed["return"].as_str().unwrap();
+
                         let mut file = match File::open(path) {
-                            Err(_e) => {println!("Cannot find the path: {}", path); return;},
+                            Err(_e) => {
+                                println!("Cannot find the path: {}", path); 
+                                event_proxy.send_event(
+                                    event_message(
+                                        "eval", 
+                                        format!("window.dispatchEvent(new CustomEvent('{return_event}', {{ error:'can't find that path!' }}));").as_str()
+                                    )
+                                ).unwrap();
+                                return;
+                            },
                             Ok(f) => f,
                         };
 
                         let mut data = String::new();
                         file.read_to_string(&mut data).unwrap();
 
-                        let return_event = parsed["return"].as_str().unwrap();
+                        
                         let new_data = str::replace(data.as_str(), "$", "\\$");
 
                         event_proxy.send_event(
@@ -171,11 +182,20 @@ fn main() -> wry::Result<()> {
 
                     "file_read_bytes" => {
                         let path = parsed["path"].as_str().unwrap();
+                        let return_event = parsed["return"].as_str().unwrap();
                         let data = match std::fs::read(path) {
-                            Err(_e) => {println!("Cannot find the path: {}", path); return;},
+                            Err(_e) => {
+                                println!("Cannot find the path: {}", path);
+                                event_proxy.send_event(
+                                    event_message(
+                                        "eval", 
+                                        format!("window.dispatchEvent(new CustomEvent('{return_event}', {{ error:'can't find that path!' }}));").as_str()
+                                    )
+                                ).unwrap();
+                                return;
+                            },
                             Ok(f) => f,
                         };
-                        let return_event = parsed["return"].as_str().unwrap();
                         let base64 = BASE64_STANDARD.encode(data);
 
                         event_proxy.send_event(
@@ -186,10 +206,41 @@ fn main() -> wry::Result<()> {
                         ).unwrap();
                     }
 
+                    "file_exists" => {
+                        let path = parsed["path"].as_str().unwrap();
+                        let return_event = parsed["return"].as_str().unwrap();
+                        
+                        if std::path::Path::new(path).is_file() {
+                            event_proxy.send_event(
+                                event_message(
+                                    "eval", 
+                                    format!("window.dispatchEvent(new CustomEvent('{return_event}', {{ detail:'true' }}));").as_str()
+                                )
+                            ).unwrap();
+                        } else {
+                            event_proxy.send_event(
+                                event_message(
+                                    "eval", 
+                                    format!("window.dispatchEvent(new CustomEvent('{return_event}', {{ detail:'false' }}));").as_str()
+                                )
+                            ).unwrap();
+                        }
+                    }
+
                     "path_list" => {
+                        let return_event = parsed["return"].as_str().unwrap();
                         let path = parsed["path"].as_str().unwrap();
                         let paths = match read_dir(path){
-                            Err(e) => {println!("Cannot find the path: {}", path); return;},
+                            Err(e) => {
+                                println!("Cannot find the path: {}", path); 
+                                event_proxy.send_event(
+                                    event_message(
+                                        "eval", 
+                                        format!("window.dispatchEvent(new CustomEvent('{return_event}', {{ error:'can't find that path!' }}));").as_str()
+                                    )
+                                ).unwrap();
+                                return;
+                            },
                             Ok(f) => f,
                         };
                         let mut output = Vec::new();
@@ -201,7 +252,7 @@ fn main() -> wry::Result<()> {
                         event_proxy.send_event(
                             event_message(
                                 "eval", 
-                                format!("window.dispatchEvent(new CustomEvent('pathlist', {{ detail:'{output_string}' }}));").as_str()
+                                format!("window.dispatchEvent(new CustomEvent('{return_event}', {{ detail:'{output_string}' }}));").as_str()
                             )
                         ).unwrap();
                     }
