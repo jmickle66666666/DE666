@@ -124,6 +124,35 @@ fn main() -> wry::Result<()> {
                         window.set_resizable(parsed["resizable"] == true);
                     }
 
+                    "is_maximized" => {
+                        let return_event = parsed["return"].as_str().unwrap();
+                        
+                        if window.is_maximized() { 
+                            event_proxy.send_event(
+                                event_message(
+                                    "eval", 
+                                    format!("window.dispatchEvent(new CustomEvent('{return_event}', {{ detail:'true' }}));").as_str()
+                                )
+                            ).unwrap();
+                        } else {
+                            event_proxy.send_event(
+                                event_message(
+                                    "eval", 
+                                    format!("window.dispatchEvent(new CustomEvent('{return_event}', {{ detail:'false' }}));").as_str()
+                                )
+                            ).unwrap();
+                        };
+                        
+                    }
+
+                    "set_maximized" => {
+                        if parsed["maximized"] == true {
+                            window.set_maximized(true);
+                        } else {
+                            window.set_maximized(false);
+                        }
+                    }
+
                     "quit" => {
                         event_proxy.send_event(
                             event_message("quit", "none")
@@ -231,7 +260,7 @@ fn main() -> wry::Result<()> {
                         let return_event = parsed["return"].as_str().unwrap();
                         let path = parsed["path"].as_str().unwrap();
                         let paths = match read_dir(path){
-                            Err(e) => {
+                            Err(_e) => {
                                 println!("Cannot find the path: {}", path); 
                                 event_proxy.send_event(
                                     event_message(
